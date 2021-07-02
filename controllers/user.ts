@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import bcryptjs from 'bcryptjs';
+import generateJWT from '../helpers/generate-jwt'
 import User from '../models/User';
 
 interface User {
@@ -40,8 +41,11 @@ export const postUsers = async (req:Request, res:Response) => {
         //Save user
         await user.save(); 
 
+        const token:string = await generateJWT(user.id);
+
         res.json({
-            msg: 'User created'
+            msg: 'User created',
+            token
         })
 
     } catch (error) {

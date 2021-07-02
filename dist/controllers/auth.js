@@ -12,42 +12,37 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.postUsers = exports.getUsers = void 0;
+exports.authUser = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
-const generate_jwt_1 = __importDefault(require("../helpers/generate-jwt"));
 const User_1 = __importDefault(require("../models/User"));
-const getUsers = (req, res) => {
-    res.json({ msg: 'Router' });
-};
-exports.getUsers = getUsers;
-const postUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const post = req.body;
-    const { email, password } = post;
+const generate_jwt_1 = __importDefault(require("../helpers/generate-jwt"));
+const authUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email, password } = req.body;
     try {
+        //check if a user exists
         let user = yield User_1.default.findOne({ email });
-        if (user) {
-            return res.status(400).json({
-                msg: 'User found in database'
+        if (!user) {
+            res.status(400).json({
+                msg: 'User doesnt exist'
             });
         }
-        user = new User_1.default(req.body);
-        //Hashear password 
-        const salt = yield bcryptjs_1.default.genSalt(10);
-        user.password = yield bcryptjs_1.default.hash(password, salt);
-        //Save user
-        yield user.save();
-        const token = yield generate_jwt_1.default(user.id);
-        res.json({
-            msg: 'User created',
+        //password
+        const correctPass = yield bcryptjs_1.default.compare(password, (user === null || user === void 0 ? void 0 : user.password) || '');
+        if (!correctPass) {
+            return res.status(400).json({
+                msg: 'Incorrect Password'
+            });
+        }
+        //jsonwebtoken
+        const token = yield generate_jwt_1.default(user === null || user === void 0 ? void 0 : user._id);
+        res.status(200).json({
+            msg: 'Auth success',
             token
         });
     }
     catch (error) {
         console.log(error);
-        res.json({
-            msg: 'Sth gone wrong'
-        });
     }
 });
-exports.postUsers = postUsers;
-//# sourceMappingURL=user.js.map
+exports.authUser = authUser;
+//# sourceMappingURL=auth.js.map

@@ -1,6 +1,8 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 import userRoutes from '../routes/users';
+import authRoute from '../routes/auth';
+import projectRoute from '../routes/projects';
 import connectionDb from '../config/db';
 
 class Server {
@@ -8,7 +10,9 @@ class Server {
     private app: Application;
     private port: string ; 
     private apiPaths = {
-        users: '/api/users'
+        users: '/api/users',
+        auth: '/api/auth',
+        projects: '/api/projects'
     }
 
 
@@ -39,7 +43,9 @@ class Server {
     
     routes() {
 
-        this.app.use(this.apiPaths.users, userRoutes)
+        this.app.use(this.apiPaths.users, userRoutes);
+        this.app.use(this.apiPaths.auth, authRoute);
+        this.app.use(this.apiPaths.projects, projectRoute);
     
     }
 
